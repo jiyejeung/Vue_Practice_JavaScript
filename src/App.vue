@@ -1,21 +1,17 @@
 <template>
-	<div class="divExample01">{{ nation }}</div>
-	<div class="divExample02">{{ objExample[0].name }}</div>
-	<button class="buttonExample" v-on:click="clickExample()">CLICK</button>
+	<h1>To-Do List</h1>
+	<input type="text" v-model="modelExample" />
+	<button class="buttonExample" @click="clickExample()">CLICK</button>
+	<div>{{ modelExample }}</div>
 </template>
 <script>
-import { ref, reactive } from 'vue';
+import { ref } from 'vue';
 
 export default {
 	setup() {
-		const nation = ref('Korea');
-		const objExample = reactive([
-			{ id: 1, name: 'yejeung' },
-			{ id: 2, name: 'yein' },
-		]);
-		const reactiveExample = reactive('Yejeung');
-		const clickExample = () => void ((nation.value = 'America'), (objExample[0].name = 'yerim'));
-		return { nation, objExample, clickExample, reactiveExample };
+		const modelExample = ref('Yejeung');
+		const clickExample = () => void console.log(modelExample.value);
+		return { modelExample, clickExample };
 	},
 };
 </script>
