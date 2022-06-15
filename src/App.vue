@@ -1,21 +1,22 @@
 <template>
-	<div class="divNameContainer">{{ greeting(name) }} {{ age }}</div>
+	<div class="divExample01">{{ nation }}</div>
+	<div class="divExample02">{{ objExample[0].name }}</div>
 	<button class="buttonExample" v-on:click="clickExample()">CLICK</button>
 </template>
 <script>
+import { ref, reactive } from 'vue';
+
 export default {
 	setup() {
-		const name = 'Yejeung';
-		const age = 27;
-		const greeting = nameArg => 'Hello ' + nameArg;
-
-		const clickExample = () => void console.log(greeting(name));
-		return { name, age, greeting, clickExample };
+		const nation = ref('Korea');
+		const objExample = reactive([
+			{ id: 1, name: 'yejeung' },
+			{ id: 2, name: 'yein' },
+		]);
+		const reactiveExample = reactive('Yejeung');
+		const clickExample = () => void ((nation.value = 'America'), (objExample[0].name = 'yerim'));
+		return { nation, objExample, clickExample, reactiveExample };
 	},
 };
 </script>
-<style>
-.divNameContainer {
-	color: coral;
-}
-</style>
+<style></style>
