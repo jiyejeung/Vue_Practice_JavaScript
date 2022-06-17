@@ -1,44 +1,55 @@
 <template>
-	<h1 class="h1TItle">To-Do List</h1>
-	<form class="formContainer" @submit.prevent="confirmEmpty(), addToDoList()">
-		<input class="inputToDoTitle" type="text" placeholder="Add To Do List" v-model="toDoList" />
-		<button class="buttonAddToDoList" type="submit">ADD</button>
-	</form>
-	<br />
-	<div class="divToggleContainer" v-show="handlerDivToggleContainer">This field must be fulfilled.</div>
-	<div class="divToDoListsContainer" v-for="toDo in toDoLists" :key="toDo.id">
-		<div class="divToDoListContainer">{{ toDo.toDoList }}</div>
+	<div class="container">
+		<h1>To Do List</h1>
+		<h4>count: {{ count }}</h4>
+		<h4>double count: {{ doubleCount }}</h4>
+		<button @click="plusCount">Count + 1</button>
+		<ToDoListForm @add-todo="addTodo" />
 	</div>
+	<div v-if="!todos.length">There is no any Todo.</div>
+	<ToDoList :todos="todos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
 </template>
+
 <script>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import ToDoListForm from './components/ToDoListForm.vue';
+import ToDoList from './components/ToDoList.vue';
 
 export default {
+	components: {
+		ToDoListForm,
+		ToDoList,
+	},
 	setup() {
-		const toDoList = ref('');
-		const toDoLists = ref([]);
-		const uniqueID = ref(1);
-		const handlerDivToggleContainer = ref(false);
-		const confirmEmpty = () => {
-			toDoList.value === '' && (handlerDivToggleContainer.value = true);
-			toDoList.value !== '' && (handlerDivToggleContainer.value = false);
+		const todos = ref([]);
+		const deleteTodo = index => {
+			todos.value.splice(index, 1);
 		};
-		const addToDoList = () => void (!handlerDivToggleContainer.value && toDoLists.value.push({ id: uniqueID.value, toDoList: toDoList.value }) && uniqueID.value++);
+		const addTodo = todo => {
+			todos.value.push(todo);
+		};
+		const toggleTodo = index => {
+			todos.value[index]['completed'] = !todos.value[index]['completed'];
+		};
+		const count = ref(1);
+		const doubleCount = computed(() => {
+			return count.value * 2; 
+		});
+		const plusCount = () => {
+			count.value++;
+		};
 
 		return {
-			toDoList,
-			toDoLists,
-			addToDoList,
-			handlerDivToggleContainer,
-			confirmEmpty,
+			todos,
+			addTodo,
+			toggleTodo,
+			deleteTodo,
+			count,
+			doubleCount,
+			plusCount,
 		};
 	},
 };
 </script>
-<style>
-.divToDoListContainer {
-	border: 1px solid black;
-	margin-top: 10px;
-	font-family: 'Times New Roman', Times, serif;
-}
-</style>
+
+<style></style>
