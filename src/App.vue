@@ -1,13 +1,13 @@
 <template>
 	<div class="container">
 		<h1>To Do List</h1>
-		<h4>count: {{ count }}</h4>
-		<h4>double count: {{ doubleCount }}</h4>
-		<button @click="plusCount">Count + 1</button>
+		<input type="text" placeholder="Search" v-model="searchText" />
+		<hr />
 		<ToDoListForm @add-todo="addTodo" />
 	</div>
-	<div v-if="!todos.length">There is no any Todo.</div>
-	<ToDoList :todos="todos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
+	<div v-show="!todos.length">There is no any Todo.</div>
+	<div v-show="!filteredTodos.length">There is nothing to display.</div>
+	<ToDoList :todos="filteredTodos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
 </template>
 
 <script>
@@ -26,27 +26,31 @@ export default {
 			todos.value.splice(index, 1);
 		};
 		const addTodo = todo => {
-			todos.value.push(todo);
+			try {
+				const xmlHttp = new XMLHttpRequest();
+				xmlHttp.open('POST', 'http://localhost:3000/todos');
+				xmlHttp.setRequestHeader('content-type', 'application/json');
+				xmlHttp.send(JSON.stringify({ id: Date.now(), subject: todo.subject, completed: todo.completed }));
+				todos.value.push(todo);
+			} catch (error) {
+				console.log(error);
+			}
 		};
 		const toggleTodo = index => {
 			todos.value[index]['completed'] = !todos.value[index]['completed'];
 		};
-		const count = ref(1);
-		const doubleCount = computed(() => {
-			return count.value * 2; 
+		const searchText = ref('');
+		const filteredTodos = computed(() => {
+			if (searchText.value) return todos.value.filter(todo => todo.subject.includes(searchText.value));
+			return todos.value;
 		});
-		const plusCount = () => {
-			count.value++;
-		};
-
 		return {
 			todos,
 			addTodo,
 			toggleTodo,
 			deleteTodo,
-			count,
-			doubleCount,
-			plusCount,
+			searchText,
+			filteredTodos,
 		};
 	},
 };
