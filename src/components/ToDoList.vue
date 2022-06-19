@@ -9,10 +9,15 @@
 </template>
 
 <script>
+// import { watchEffect } from 'vue';
+
 export default {
 	props: { todos: { type: Array, required: true } },
 	emits: ['toggle-todo', 'delete-todo'],
 	setup(props, context) {
+		// watchEffect(() => {
+		// 	console.log(props.todos.length);
+		// });
 		const toggleTodo = index => {
 			context.emit('toggle-todo', index);
 		};

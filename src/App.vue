@@ -1,13 +1,12 @@
 <template>
 	<div class="container">
 		<h1>To Do List</h1>
-		<input type="text" placeholder="Search" v-model="searchText" />
+		<input type="text" placeholder="Search" v-model="searchText" @keyup.enter="searchTodo" />
 		<hr />
 		<ToDoListForm @add-todo="addTodo" />
 	</div>
-	<div v-show="!todos.length">There is no any Todo.</div>
-	<div v-show="!filteredTodos.length">There is nothing to display.</div>
-	<ToDoList :todos="filteredTodos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
+	<div v-show="!todos.length">There is nothing to display.</div>
+	<ToDoList :todos="todos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
 	<hr />
 	<ul class="paginationContainer">
 		<li @click="previousPage">Previous</li>
@@ -17,7 +16,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch /* watchEffect, reactive */ } from 'vue';
 import ToDoListForm from './components/ToDoListForm.vue';
 import ToDoList from './components/ToDoList.vue';
 
@@ -32,16 +31,28 @@ export default {
 		const totalPage = ref(0);
 		const limit = 5;
 		const numPage = ref(1);
+		const searchText = ref('');
 		const currentPage = computed(() => Math.ceil(totalPage.value / limit));
+
+		// watch(numPage, (newV, prevV) => {
+		// 	console.log(newV, prevV);
+		// });
+
+		// const example01 = reactive({ exampleKey: 1 });
+		// watchEffect(() => {
+		// 	console.log(example01.exampleKey);
+		// });
+		// example01.exampleKey = 3;
+
 		const initTodos = async (page = numPage.value) => {
 			numPage.value = page;
 			// pagination
-			await fetch('http://localhost:3000/todos')
+			await fetch(`http://localhost:3000/todos?subject_like=${searchText.value}`)
 				.then(res => res.json())
 				.then(res => (totalPage.value = res.length))
 				.catch(err => console.log(err));
 
-			await fetch(`http://localhost:3000/todos?_page=${page}&_limit=${limit}`)
+			await fetch(`http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`)
 				.then(res => res.json())
 				.then(res => (todos.value = res))
 				.catch(err => console.log(err));
@@ -70,7 +81,7 @@ export default {
 					if (!res.ok) throw new Error(res.statusText);
 					return res.json();
 				})
-				.then(() => todos.value.splice(index, 1))
+				.then(() => initTodos())
 				.catch(err => console.log(err));
 		};
 		const addTodo = async todo => {
@@ -84,7 +95,7 @@ export default {
 					if (!res.ok) throw new Error(res.statusText);
 					return res.json();
 				})
-				.then(res => todos.value.push(res))
+				.then(() => initTodos())
 				.catch(err => console.log(err));
 			//
 			// Promise
@@ -120,11 +131,21 @@ export default {
 				.then(res => (todos.value[index]['completed'] = res['completed']))
 				.catch(err => console.log(err));
 		};
-		const searchText = ref('');
-		const filteredTodos = computed(() => {
-			if (searchText.value) return todos.value.filter(todo => todo.subject.includes(searchText.value));
-			return todos.value;
+		let timeout = null;
+		const searchTodo = () => {
+			clearTimeout(timeout);
+			initTodos();
+		};
+		watch(searchText, () => {
+			clearTimeout(timeout);
+			timeout = setTimeout(() => {
+				initTodos();
+			}, 1000);
 		});
+		// const filteredTodos = computed(() => {
+		// 	if (searchText.value) return todos.value.filter(todo => todo.subject.includes(searchText.value));
+		// 	return todos.value;
+		// });
 		return {
 			todos,
 			currentPage,
@@ -136,7 +157,8 @@ export default {
 			toggleTodo,
 			deleteTodo,
 			searchText,
-			filteredTodos,
+			searchTodo,
+			// filteredTodos,
 		};
 	},
 };
