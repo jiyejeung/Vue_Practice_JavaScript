@@ -24,19 +24,18 @@ export default {
 	},
 	emits: ['current-page'],
 	setup(props, context) {
-		const currentPage = ref(1);
+		const currentPageIndex = ref(0);
 		const totalPage = ref(0);
 		watch(props, () => {
 			totalPage.value = Math.ceil(props.totalToDos.length / props.toDoItemLimitCount);
 		});
-		watch(currentPage, () => void context.emit('current-page', currentPage.value));
+		watch(currentPageIndex, () => void context.emit('current-page', currentPageIndex.value));
 
-		const showPrev = () => void (currentPage.value = currentPage.value - 1 ? currentPage.value - 1 : 1);
-		const showCurrent = currentPageNum => void (currentPage.value = currentPageNum);
-		const showNext = () => void (currentPage.value = currentPage.value + 1 > totalPage.value ? currentPage.value : currentPage.value + 1);
+		const showPrev = () => void (currentPageIndex.value = currentPageIndex.value ? currentPageIndex.value - 1 : currentPageIndex.value);
+		const showCurrent = currentPageNum => void (currentPageIndex.value = currentPageNum - 1);
+		const showNext = () => void (currentPageIndex.value = currentPageIndex.value > totalPage.value - 2 ? currentPageIndex.value : currentPageIndex.value + 1);
 
 		return {
-			currentPage,
 			totalPage,
 			showPrev,
 			showCurrent,

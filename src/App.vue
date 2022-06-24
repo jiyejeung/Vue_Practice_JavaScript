@@ -28,14 +28,18 @@ export default {
 		const toDos = ref([]);
 		const toDoItemLimitCount = 10;
 		const init = async () => {
-			await fetch('http://localhost:3000/toDoList')
+			await fetch('http://localhost:3000/toDoList?_sort=id&_order=desc')
 				.then(res => res.json())
 				.then(res => (totalToDos.value = [...res]))
 				.then(() => (toDos.value = [...totalToDos.value].splice(0, toDoItemLimitCount)))
 				.catch(err => console.log(err));
 		};
-		const searchToDo = searchKeyword => {
-			toDos.value = totalToDos.value.filter(({ subject }) => subject.includes(searchKeyword));
+		const searchToDo = async searchKeyword => {
+			await fetch(`http://localhost:3000/toDoList?_sort=id&_order=desc&subject_like=${searchKeyword}`)
+				.then(res => res.json())
+				.then(res => (totalToDos.value = [...res]))
+				.then(() => (toDos.value = [...totalToDos.value].splice(0, toDoItemLimitCount)))
+				.catch(err => console.log(err));
 		};
 		const addToDo = async toDoKeyword => {
 			await fetch('http://localhost:3000/toDoList', {
@@ -46,14 +50,10 @@ export default {
 				.then(() => init())
 				.catch(err => console.log(err));
 		};
-		const showToDoList = currentPage => {
-			console.log(currentPage);
-			// toDos.value = [...totalToDos.value].splice();
+		const showToDoList = currentPageIndex => {
+			toDos.value = [...totalToDos.value].splice(currentPageIndex * toDoItemLimitCount, currentPageIndex * toDoItemLimitCount ? currentPageIndex * toDoItemLimitCount : toDoItemLimitCount);
 		};
 		const changeCompleted = (id, completed) => {
-			// RESTful API
-			// totalToDos 초기화
-			// toDos 초기화
 			console.log(id, completed);
 		};
 		const deleteToDo = id => {
